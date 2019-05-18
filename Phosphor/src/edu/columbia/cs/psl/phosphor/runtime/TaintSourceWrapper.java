@@ -144,7 +144,11 @@ public class TaintSourceWrapper<T extends AutoTaintLabel> {
 	}
 
 	public static Taint[] getStringValueTaints(String str) {
-		return getStringValueTag(str).taints;
+		if (getStringValueTag(str) == null) {
+			return null;
+		} else {
+			return getStringValueTag(str).taints;
+		}
 	}
 
 	/* Called by sink methods. */
