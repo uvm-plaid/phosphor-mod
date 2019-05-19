@@ -253,6 +253,7 @@ public class Instrumenter {
 	public static InputStream sourcesFile;
 	public static InputStream sinksFile;
 	public static InputStream taintThroughFile;
+	public static InputStream sanitizersFile;
 
 	public static boolean ANALYZE_ONLY;
 	

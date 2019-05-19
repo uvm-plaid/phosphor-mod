@@ -60,6 +60,12 @@ public abstract class SourceSinkManager {
 		return isSink(insn.owner + "." + insn.name + insn.desc);
 	}
 
+	public abstract boolean isSanitizer(String str);
+
+	public boolean isSanitizer(MethodInsnNode insn) {
+		return isSanitizer(insn.owner + "." + insn.name + insn.desc);
+	}
+
 	public static String remapMethodDescToRemoveTaints(String desc) {
 		String r = "(";
 		boolean isSkipping = false;
@@ -178,6 +184,10 @@ public abstract class SourceSinkManager {
 
 	public boolean isSource(String owner, String name, String taintedDesc) {
 		return isSource(getOriginalMethodSignature(owner, name, taintedDesc));
+	}
+
+	public boolean isSanitizer(String owner, String name, String taintedDesc) {
+		return isSanitizer(getOriginalMethodSignature(owner, name, taintedDesc));
 	}
 
 	/* Returns the name of sink method from which the specified method inherited its sink property or null if the specified

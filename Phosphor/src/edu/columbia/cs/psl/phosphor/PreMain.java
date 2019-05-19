@@ -497,6 +497,13 @@ public class PreMain {
 					} catch (FileNotFoundException e) {
 						e.printStackTrace();
 					}
+				} else if (s.startsWith("taintSanitizers=")) {
+					try {
+						System.out.println("found taintSanitizers: " + s.substring(16));
+						Instrumenter.sanitizersFile = new FileInputStream(s.substring(16));
+					} catch (FileNotFoundException e) {
+						e.printStackTrace();
+					}
 				} else if(s.startsWith("taintSourceWrapper=")) {
 					Class c;
 					try {

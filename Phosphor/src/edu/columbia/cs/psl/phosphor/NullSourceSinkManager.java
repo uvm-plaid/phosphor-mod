@@ -31,4 +31,7 @@ public class NullSourceSinkManager extends SourceSinkManager{
 	public String getBaseSink(String str) {
 		return null;
 	}
+
+	@Override
+	public boolean isSanitizer(String str) {return false;}
 }

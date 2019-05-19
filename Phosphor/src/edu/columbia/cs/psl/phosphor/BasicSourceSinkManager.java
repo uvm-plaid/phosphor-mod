@@ -6,6 +6,7 @@ import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.ClassNode;
+import sun.java2d.pipe.SpanShapeRenderer;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -26,12 +27,16 @@ public class BasicSourceSinkManager extends SourceSinkManager {
 	// Maps class names to a set of all the  methods listed as taintThrough methods for the class
 	private static ConcurrentHashMap<String, SimpleHashSet<String>> taintThrough = new ConcurrentHashMap<>();
 
+	private static ConcurrentHashMap<String, SimpleHashSet<String>> sanitizers = new ConcurrentHashMap<>();
+
 	// Maps class names to a set of all methods listed as sources for the class or one of its supertypes or superinterfaces
 	private static ConcurrentHashMap<String, SimpleHashSet<String>> inheritedSources = new ConcurrentHashMap<>();
 	// Maps class names to a set of all methods listed as sinks for the class or one of its supertypes or superinterfaces
 	private static ConcurrentHashMap<String, SimpleHashSet<String>> inheritedSinks = new ConcurrentHashMap<>();
 	// Maps class names to a set of all methods listed as taintThrough methods for the class or one of its supertypes or superinterfaces
 	private static ConcurrentHashMap<String, SimpleHashSet<String>> inheritedTaintThrough = new ConcurrentHashMap<>();
+
+	private static ConcurrentHashMap<String, SimpleHashSet<String>> inheritedSanitizers = new ConcurrentHashMap<>();
 
 	// Maps class names to sets of class instances
 	private static ConcurrentHashMap<String, SimpleHashSet<Class<?>>> classMap = new ConcurrentHashMap<>();
@@ -41,6 +46,7 @@ public class BasicSourceSinkManager extends SourceSinkManager {
 		readTaintMethods(Instrumenter.sourcesFile, AutoTaint.SOURCE);
 		readTaintMethods(Instrumenter.sinksFile, AutoTaint.SINK);
 		readTaintMethods(Instrumenter.taintThroughFile, AutoTaint.TAINT_THROUGH);
+		readTaintMethods(Instrumenter.sanitizersFile, AutoTaint.SANITIZER);
 	}
 
 	/* Private constructor ensures that only one instance of BasicSourceSinkManager is ever created. */
@@ -70,6 +76,9 @@ public class BasicSourceSinkManager extends SourceSinkManager {
 				break;
 			case SINK:
 				baseMethods = sinks;
+				break;
+			case SANITIZER:
+				baseMethods = sanitizers;
 				break;
 			default:
 				baseMethods = taintThrough;
@@ -152,6 +161,11 @@ public class BasicSourceSinkManager extends SourceSinkManager {
 				prevInheritedMethods = inheritedSinks;
 				// Clear the map of inherited or derived autoTaint methods of the specified type
 				inheritedMethods = inheritedSinks = new ConcurrentHashMap<>();
+				break;
+			case SANITIZER:
+				baseMethods = sanitizers;
+				prevInheritedMethods = inheritedSanitizers;
+				inheritedMethods = inheritedSanitizers = new ConcurrentHashMap<>();
 				break;
 			default:
 				baseMethods = taintThrough;
@@ -236,7 +250,8 @@ public class BasicSourceSinkManager extends SourceSinkManager {
 		// This class has a sink, source or taintThrough method
 		return !getAutoTaintMethods(className, sinks, inheritedSinks).isEmpty() ||
 				!getAutoTaintMethods(className, sources, inheritedSources).isEmpty() ||
-				!getAutoTaintMethods(className, taintThrough, inheritedTaintThrough).isEmpty();
+				!getAutoTaintMethods(className, taintThrough, inheritedTaintThrough).isEmpty() ||
+				!getAutoTaintMethods(className, sanitizers, inheritedSanitizers).isEmpty();
 	}
 
 	@Override
@@ -319,6 +334,16 @@ public class BasicSourceSinkManager extends SourceSinkManager {
 		}
 	}
 
+	@Override
+	public boolean isSanitizer(String str) {
+		if (str.startsWith("[")) {
+			return false;
+		} else {
+			String[] parsed = str.split("\\.");
+			return getAutoTaintMethods(parsed[0], sanitizers, inheritedSanitizers).contains(parsed[1]);
+		}
+	}
+
 	/* Returns the name of sink method from which the specified method inherited its sink property or null if the specified
 	 * method is not a sink. */
 	public String getBaseSink(String str) {
@@ -331,7 +356,8 @@ public class BasicSourceSinkManager extends SourceSinkManager {
 	public enum AutoTaint {
 		SOURCE ("sources"),
 		SINK("sinks"),
-		TAINT_THROUGH("taintThrough");
+		TAINT_THROUGH("taintThrough"),
+		SANITIZER("sanitizers");
 
 		public final String name;
 		AutoTaint(String name) {
