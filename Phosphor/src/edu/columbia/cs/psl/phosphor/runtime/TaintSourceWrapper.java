@@ -169,6 +169,7 @@ public class TaintSourceWrapper<T extends AutoTaintLabel> {
 				SimpleHashSet<String> reported = new SimpleHashSet<>();
 				for (Taint t : taints) {
 					if (t != null) {
+						//System.out.println(t.getTaintLevel());
 						String _t = new String(t.toString().getBytes());
 						if (reported.add(_t))
 							taintViolation(t, obj, baseSink, actualSink);
@@ -210,6 +211,7 @@ public class TaintSourceWrapper<T extends AutoTaintLabel> {
 	}
 
     public void taintViolation(Taint<T> tag, Object obj, String baseSink, String actualSink) {
+		System.out.println(tag.getTaintLevel());
         throw new TaintSinkError(tag, obj);
     }
 

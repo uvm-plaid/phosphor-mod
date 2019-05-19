@@ -30,8 +30,19 @@ public class Taint<T> implements Serializable {
 
 	private transient T singleLabelModeLabel;
 
+	private TaintLevel taintLevel;
+
+	public TaintLevel getTaintLevel() {
+		return taintLevel;
+	}
+
+	public void setTaintLevel(TaintLevel taintLevel) {
+		this.taintLevel = taintLevel;
+	}
+
 	/* Constructs a new taint object with an empty label set. */
 	public Taint() {
+		taintLevel = TaintLevel.TAINTED;
 		if(BIT_SET_CAPACITY <= 0) {
 			// SetNode representation is being used
 			this.labelSet = setTree.emptySet();
@@ -40,6 +51,7 @@ public class Taint<T> implements Serializable {
 
 	/* Constructs a new taint object with only the specified label in its label set. */
 	public Taint(T initialLabel) {
+		taintLevel = TaintLevel.TAINTED;
 		if(BIT_SET_CAPACITY > 0) {
 			// BitSet representation is being used
 			if(initialLabel instanceof Integer) {
@@ -61,6 +73,7 @@ public class Taint<T> implements Serializable {
 
 	/* Constructs a new taint object with only the specified label in its label set. */
 	public Taint(int initialLabel) {
+		taintLevel = TaintLevel.TAINTED;
 		if(BIT_SET_CAPACITY > 0) {
 			// BitSet representation is being used
 			this.labelBitSet = new BitSet(BIT_SET_CAPACITY);
@@ -73,6 +86,8 @@ public class Taint<T> implements Serializable {
 
 	/* Constructs a new taint object with the same labels as the specified taint object. */
 	public Taint(Taint<T> t1) {
+		taintLevel = TaintLevel.fromTaint(t1);
+
 		if(Configuration.SINGLE_TAINT_LABEL) {
 			if(t1 != null)
 				this.singleLabelModeLabel = t1.singleLabelModeLabel;
@@ -92,6 +107,10 @@ public class Taint<T> implements Serializable {
 
 	/* Constructs a new taint object whose label set is the union of the label sets of the two specified taint objects. */
 	public Taint(Taint<T> t1, Taint<T> t2) {
+		TaintLevel taintLevel1 = TaintLevel.fromTaint(t1);
+		TaintLevel taintLevel2 = TaintLevel.fromTaint(t2);
+		taintLevel = taintLevel1.leastUpperBound(taintLevel2);
+
 		if(Configuration.SINGLE_TAINT_LABEL){
 			if(t1 == null && t2 == null)
 				this.singleLabelModeLabel = null;
@@ -214,6 +233,7 @@ public class Taint<T> implements Serializable {
 				return false;
 			}
 		} else {
+			taintLevel = taintLevel.leastUpperBound(other.getTaintLevel());
 			// SetNode representation is being used
 			PowerSetTree.SetNode union = this.labelSet.union(other.labelSet);
 			boolean changed = (this.labelSet != union);
