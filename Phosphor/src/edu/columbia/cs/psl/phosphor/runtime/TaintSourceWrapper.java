@@ -1,5 +1,6 @@
 package edu.columbia.cs.psl.phosphor.runtime;
 
+import com.sun.org.apache.xpath.internal.operations.Mult;
 import edu.columbia.cs.psl.phosphor.struct.*;
 
 import java.lang.reflect.Array;
@@ -61,7 +62,13 @@ public class TaintSourceWrapper<T extends AutoTaintLabel> {
 	}
 
 	public static void sanitize(Object obj) {
-		System.out.println("TaintSourceWrapper sanitize!");
+		System.out.println("TaintSourceWrapper sanitize! " + obj);
+		if (obj instanceof TaintedWithObjTag) {
+			Taint taint = MultiTainter.getTaint(obj);
+			if (taint != null) {
+				taint.setTaintLevel(taint.getTaintLevel().greatestLowerBound(TaintLevel.MAYBE_TAINTED));
+			}
+		}
 	}
 
 	public Taint<AutoTaintLabel> generateTaint(String source) {
