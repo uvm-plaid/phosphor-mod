@@ -222,8 +222,12 @@ public class TaintSourceWrapper<T extends AutoTaintLabel> {
 	}
 
     public void taintViolation(Taint<T> tag, Object obj, String baseSink, String actualSink) {
-		System.out.println(tag.getTaintLevel());
-        throw new TaintSinkError(tag, obj);
+		TaintLevel taintLevel = TaintLevel.fromTaint(tag);
+		if (taintLevel == TaintLevel.MAYBE_TAINTED) {
+			System.out.println("maybe tainted value sunk!");
+		} else if (taintLevel == TaintLevel.TAINTED) {
+			throw new TaintSinkError(tag, obj);
+		}
     }
 
 	public void checkTaint(int tag, String actualSink) {
