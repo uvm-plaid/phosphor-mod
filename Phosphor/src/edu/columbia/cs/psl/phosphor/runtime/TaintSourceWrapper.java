@@ -60,6 +60,10 @@ public class TaintSourceWrapper<T extends AutoTaintLabel> {
 		}
 	}
 
+	public static void sanitize(Object obj) {
+		System.out.println("TaintSourceWrapper sanitize!");
+	}
+
 	public Taint<AutoTaintLabel> generateTaint(String source) {
 		StackTraceElement[] st = Thread.currentThread().getStackTrace();
 		StackTraceElement[] s = new StackTraceElement[st.length - 3];

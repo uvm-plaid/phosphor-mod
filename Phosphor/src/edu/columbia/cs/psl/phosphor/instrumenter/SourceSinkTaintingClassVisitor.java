@@ -57,6 +57,7 @@ public class SourceSinkTaintingClassVisitor extends ClassVisitor {
             }
             if (BasicSourceSinkManager.getInstance().isSanitizer(className, name, desc)) {
                 System.out.println("is a sanitizer: " + className + " " + name + " " + desc);
+                mv = new SanitizerMV(mv, access, className, name, desc);
             }
         }
         return mv;
