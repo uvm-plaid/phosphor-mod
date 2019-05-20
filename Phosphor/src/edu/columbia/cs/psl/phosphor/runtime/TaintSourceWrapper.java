@@ -61,12 +61,45 @@ public class TaintSourceWrapper<T extends AutoTaintLabel> {
 		}
 	}
 
+	private static void sanitizeTaint(Taint taint) {
+		if (taint != null) {
+			taint.setTaintLevel(taint.getTaintLevel().greatestLowerBound(TaintLevel.MAYBE_TAINTED));
+		}
+	}
+
+	/* called by sanitizers */
 	public static void sanitize(Object obj) {
 		System.out.println("TaintSourceWrapper sanitize! " + obj);
-		if (obj instanceof TaintedWithObjTag) {
-			Taint taint = MultiTainter.getTaint(obj);
-			if (taint != null) {
-				taint.setTaintLevel(taint.getTaintLevel().greatestLowerBound(TaintLevel.MAYBE_TAINTED));
+		if(obj instanceof String) {
+			Taint[] taints = getStringValueTaints((String) obj);
+			if (taints != null) {
+				for (Taint t : taints) {
+					sanitizeTaint(t);
+				}
+			}
+		} else if(obj instanceof TaintedWithObjTag) {
+			if (((TaintedWithObjTag) obj).getPHOSPHOR_TAG() != null) {
+				sanitizeTaint((Taint) ((TaintedWithObjTag) obj).getPHOSPHOR_TAG());
+			}
+		}else if(obj instanceof LazyArrayObjTags) {
+			LazyArrayObjTags tags = ((LazyArrayObjTags) obj);
+			if(tags.taints != null) {
+				for(Object i : tags.taints) {
+					sanitizeTaint((Taint) i);
+				}
+			}
+		} else if(obj instanceof Object[]) {
+			for(Object o : ((Object[]) obj)) {
+				sanitize(o);
+			}
+		} else if(obj instanceof ControlTaintTagStack) {
+			ControlTaintTagStack ctrl = (ControlTaintTagStack) obj;
+			if (ctrl.taint != null && !ctrl.isEmpty()) {
+				sanitize(ctrl.taint);
+			}
+		} else if(obj instanceof TaintedPrimitiveWithObjTag) {
+			if(((TaintedPrimitiveWithObjTag)obj).taint != null) {
+				sanitizeTaint(((TaintedPrimitiveWithObjTag) obj).taint);
 			}
 		}
 	}
@@ -86,6 +119,7 @@ public class TaintSourceWrapper<T extends AutoTaintLabel> {
 
 	/* Adds the specified tag to the specified object. */
 	public Object autoTaint(Object obj, Taint<? extends AutoTaintLabel> tag) {
+		tag.setTaintLevel(TaintLevel.TAINTED);
 	    if(obj == null) {
 	        return null;
         } else if(obj instanceof LazyArrayObjTags) {
@@ -167,6 +201,7 @@ public class TaintSourceWrapper<T extends AutoTaintLabel> {
 	public void checkTaint(Object self, Object[] arguments, String baseSink, String actualSink) {
 		if(arguments != null) {
 			for(Object argument : arguments) {
+				System.out.println("argument: " + argument);
 				checkTaint(argument, baseSink, actualSink);
 			}
 		}
@@ -223,6 +258,7 @@ public class TaintSourceWrapper<T extends AutoTaintLabel> {
 
     public void taintViolation(Taint<T> tag, Object obj, String baseSink, String actualSink) {
 		TaintLevel taintLevel = TaintLevel.fromTaint(tag);
+		System.out.println(taintLevel);
 		if (taintLevel == TaintLevel.MAYBE_TAINTED) {
 			System.out.println("maybe tainted value sunk!");
 		} else if (taintLevel == TaintLevel.TAINTED) {

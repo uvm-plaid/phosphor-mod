@@ -71,4 +71,16 @@ public class SanitizerMV extends MethodVisitor implements Opcodes {
 
         }
     }
+
+    @Override
+    public void visitInsn(int opcode) {
+        if (opcode == ARETURN) {
+            Type returnType = Type.getReturnType(desc);
+            if (returnType.getSort() != Type.VOID && Configuration.MULTI_TAINTING) {
+                super.visitInsn(DUP);
+                super.visitMethodInsn(INVOKESTATIC, Type.getInternalName(TaintSourceWrapper.class), "sanitize", "(Ljava/lang/Object;)V", false);
+            }
+        }
+        super.visitInsn(opcode);
+    }
 }

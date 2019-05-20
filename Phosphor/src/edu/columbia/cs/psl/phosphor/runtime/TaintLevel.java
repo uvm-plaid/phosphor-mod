@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.Collection;
 
 public enum TaintLevel {
+    UNKNOWN,
     NOT_TAINTED,
     MAYBE_TAINTED,
     TAINTED;
@@ -13,10 +14,12 @@ public enum TaintLevel {
     private static Lattice<TaintLevel> taintLevelLattice = new Lattice<>();
 
     static {
+        taintLevelLattice.addElement(UNKNOWN);
         taintLevelLattice.addElement(NOT_TAINTED);
         taintLevelLattice.addElement(MAYBE_TAINTED);
         taintLevelLattice.addElement(TAINTED);
 
+        taintLevelLattice.addOrdering(UNKNOWN, NOT_TAINTED);
         taintLevelLattice.addOrdering(NOT_TAINTED, MAYBE_TAINTED);
         taintLevelLattice.addOrdering(MAYBE_TAINTED, TAINTED);
     }
