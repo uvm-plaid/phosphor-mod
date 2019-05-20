@@ -48,9 +48,6 @@ public class SanitizerMV extends MethodVisitor implements Opcodes {
     @Override
     public void visitCode() {
         super.visitCode();
-        System.out.println("code visited");
-        //autoSanitizeArguments();
-
         Type[] args = Type.getArgumentTypes(desc);
         int idx = 0;
         if (!isStatic)

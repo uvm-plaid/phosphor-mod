@@ -86,9 +86,7 @@ public class Taint<T> implements Serializable {
 
 	/* Constructs a new taint object with the same labels as the specified taint object. */
 	public Taint(Taint<T> t1) {
-		System.out.println("new taint from other taint:");
 		taintLevel = TaintLevel.fromTaint(t1);
-		System.out.println(taintLevel);
 
 		if(Configuration.SINGLE_TAINT_LABEL) {
 			if(t1 != null)
