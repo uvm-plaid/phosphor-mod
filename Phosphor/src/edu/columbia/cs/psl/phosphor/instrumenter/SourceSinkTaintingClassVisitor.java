@@ -2,6 +2,7 @@ package edu.columbia.cs.psl.phosphor.instrumenter;
 
 import edu.columbia.cs.psl.phosphor.BasicSourceSinkManager;
 import edu.columbia.cs.psl.phosphor.Configuration;
+import edu.columbia.cs.psl.phosphor.Logger;
 import edu.columbia.cs.psl.phosphor.TaintUtils;
 
 import org.objectweb.asm.ClassVisitor;
@@ -47,16 +48,18 @@ public class SourceSinkTaintingClassVisitor extends ClassVisitor {
             }
             if(BasicSourceSinkManager.getInstance().isSource(className, name, desc)) {
                 // Method is a source
+                Logger.info("found source: " + className + " " + name + " " + desc);
                 mv = new SourceTaintingMV(mv, access, className, name, desc);
             }
             if(BasicSourceSinkManager.getInstance().isTaintThrough(className, name, desc)) {
                 // Method is a taintThrough method
+                Logger.info("found taint through: " + className + " " + name + " " + desc);
                 if ((access & Opcodes.ACC_STATIC) == 0) {
                     mv = new TaintThroughTaintingMV(mv, access, className, name, desc);
                 }
             }
             if (BasicSourceSinkManager.getInstance().isSanitizer(className, name, desc)) {
-                System.out.println("is a sanitizer: " + className + " " + name + " " + desc);
+                Logger.info("found sanitizer: " + className + " " + name + " " + desc);
                 mv = new SanitizerMV(mv, access, className, name, desc);
             }
         }

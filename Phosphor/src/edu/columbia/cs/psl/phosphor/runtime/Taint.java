@@ -107,7 +107,6 @@ public class Taint<T> implements Serializable {
 
 	/* Constructs a new taint object whose label set is the union of the label sets of the two specified taint objects. */
 	public Taint(Taint<T> t1, Taint<T> t2) {
-		System.out.println("new taint from union");
 		TaintLevel taintLevel1 = TaintLevel.fromTaint(t1);
 		TaintLevel taintLevel2 = TaintLevel.fromTaint(t2);
 		taintLevel = taintLevel1.leastUpperBound(taintLevel2);
@@ -220,7 +219,6 @@ public class Taint<T> implements Serializable {
 	/* Sets this taint's label set to be the union between this taint's label set and the specified other
 	 * taint's label set. Returns whether this taint's label set changed. */
 	public boolean addDependency(Taint<T> other) {
-		System.out.println("add dependency");
 		if (other == null) {
 			return false;
 		}
@@ -290,7 +288,6 @@ public class Taint<T> implements Serializable {
 
 	@SuppressWarnings("unchecked")
 	public static <T> void _combineTagsInPlace(Object obj, Taint<T> t1) {
-		System.out.println("_combineTagsInPlace");
 		Taint<T> t = (Taint<T>) TaintUtils.getTaintObj(obj);
 
 		TaintLevel taintLevel = t.getTaintLevel().leastUpperBound(t1.getTaintLevel());
@@ -316,7 +313,6 @@ public class Taint<T> implements Serializable {
 		TaintLevel taintLevel = t1.getTaintLevel().leastUpperBound(t2.getTaintLevel());
 		t1.setTaintLevel(taintLevel);
 		t2.setTaintLevel(taintLevel);
-		System.out.println("combine tags");
 
 		if(t1.equals(t2) || IGNORE_TAINTING) {
 			return t1;

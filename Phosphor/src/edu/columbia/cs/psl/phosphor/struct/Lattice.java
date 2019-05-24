@@ -67,7 +67,7 @@ public class Lattice<Element extends Comparable> {
         if (minimal == null || element.compareTo(minimal) < 0) {
             minimal = element;
         }
-        if (maximal == null || element.compareTo(maximal) > 1) {
+        if (maximal == null || element.compareTo(maximal) > 0) {
             maximal = element;
         }
     }

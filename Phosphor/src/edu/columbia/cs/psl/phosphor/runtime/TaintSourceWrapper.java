@@ -1,6 +1,7 @@
 package edu.columbia.cs.psl.phosphor.runtime;
 
 import com.sun.org.apache.xpath.internal.operations.Mult;
+import edu.columbia.cs.psl.phosphor.Logger;
 import edu.columbia.cs.psl.phosphor.struct.*;
 
 import java.lang.reflect.Array;
@@ -69,7 +70,7 @@ public class TaintSourceWrapper<T extends AutoTaintLabel> {
 
 	/* called by sanitizers */
 	public static void sanitize(Object obj) {
-		System.out.println("TaintSourceWrapper sanitize! " + obj);
+		Logger.info("sanitized: " + obj);
 		if(obj instanceof String) {
 			Taint[] taints = getStringValueTaints((String) obj);
 			if (taints != null) {
@@ -201,7 +202,6 @@ public class TaintSourceWrapper<T extends AutoTaintLabel> {
 	public void checkTaint(Object self, Object[] arguments, String baseSink, String actualSink) {
 		if(arguments != null) {
 			for(Object argument : arguments) {
-				System.out.println("argument: " + argument);
 				checkTaint(argument, baseSink, actualSink);
 			}
 		}
@@ -258,9 +258,8 @@ public class TaintSourceWrapper<T extends AutoTaintLabel> {
 
     public void taintViolation(Taint<T> tag, Object obj, String baseSink, String actualSink) {
 		TaintLevel taintLevel = TaintLevel.fromTaint(tag);
-		System.out.println(taintLevel);
 		if (taintLevel == TaintLevel.MAYBE_TAINTED) {
-			System.out.println("maybe tainted value sunk!");
+			Logger.warning("maybe tainted value sunk!\n" + tag + "\n" + obj);
 		} else if (taintLevel == TaintLevel.TAINTED) {
 			throw new TaintSinkError(tag, obj);
 		}

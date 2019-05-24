@@ -25,14 +25,12 @@ public class TaintChecker {
 	}
 	public static void checkTaint(Taint tag)
 	{
-		System.out.println("checkTaint(Taint)");
 		if(taintCheckerSetter != null)
 			taintCheckerSetter.checkTaint(tag);
 		else if(tag != null)
 			throw new TaintSinkError(tag, null);
 	}
 	public static void checkTaint(Object obj) {
-		System.out.println("checkTaint(Object)");
 		if(obj == null)
 			return;
 		if (obj instanceof TaintedWithIntTag) {
