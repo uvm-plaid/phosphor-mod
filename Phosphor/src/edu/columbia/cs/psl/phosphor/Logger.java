@@ -59,4 +59,8 @@ public class Logger {
         log("ERROR", message);
     }
 
+    public static void debug(String message) {
+        log("DEBUG", message);
+    }
+
 }
