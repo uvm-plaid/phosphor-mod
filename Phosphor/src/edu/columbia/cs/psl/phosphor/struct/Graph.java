@@ -1,16 +1,14 @@
 package edu.columbia.cs.psl.phosphor.struct;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 
 /**
  * A keyed, dataless implementation of a directed graph
- * @param <KeyType> The type of key to associate with each node in the graph. Any comparable can be used with the same
- *                  runtime complexity.
+ * @param <KeyType> The type of key to associate with each node in the graph.
  */
-class Graph<KeyType extends Comparable> {
+class Graph<KeyType> {
 
     /**
      * A class used to represent the edges of the graph.
@@ -296,7 +294,6 @@ class Graph<KeyType extends Comparable> {
     public String toString() {
         String string = "";
         java.util.ArrayList<KeyType> keys = new java.util.ArrayList<>(adjacencyList.keySet());
-        Collections.sort(keys);
         for (KeyType key : keys) {
             string += key.toString() + ":";
             Node node = getNode(key);

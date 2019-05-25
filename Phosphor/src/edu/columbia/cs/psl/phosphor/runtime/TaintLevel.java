@@ -11,13 +11,10 @@ public enum TaintLevel {
     MAYBE_TAINTED,
     TAINTED;
 
-    private static Lattice<TaintLevel> taintLevelLattice = new Lattice<>();
+    private static Lattice<TaintLevel> taintLevelLattice;
 
     static {
-        taintLevelLattice.addElement(UNKNOWN);
-        taintLevelLattice.addElement(NOT_TAINTED);
-        taintLevelLattice.addElement(MAYBE_TAINTED);
-        taintLevelLattice.addElement(TAINTED);
+        taintLevelLattice = new Lattice<>(Arrays.asList(values()));
 
         taintLevelLattice.addOrdering(UNKNOWN, NOT_TAINTED);
         taintLevelLattice.addOrdering(NOT_TAINTED, MAYBE_TAINTED);
@@ -33,18 +30,18 @@ public enum TaintLevel {
     }
 
     public static TaintLevel getGreatestLowerBound(Collection<TaintLevel> taintLevels) {
-        return taintLevelLattice.getGreatestLowerBound(taintLevels);
+        return taintLevelLattice.greatestLowerBound(taintLevels);
     }
 
     public static TaintLevel getLeastUpperBound(Collection<TaintLevel> taintLevels) {
-        return taintLevelLattice.getLeastUpperBound(taintLevels);
+        return taintLevelLattice.leastUpperBound(taintLevels);
     }
 
     public TaintLevel greatestLowerBound(TaintLevel taintLevel) {
-        return taintLevelLattice.getGreatestLowerBound(Arrays.asList(this, taintLevel));
+        return taintLevelLattice.greatestLowerBound(Arrays.asList(this, taintLevel));
     }
 
     public TaintLevel leastUpperBound(TaintLevel taintLevel) {
-        return taintLevelLattice.getLeastUpperBound(Arrays.asList(this, taintLevel));
+        return taintLevelLattice.leastUpperBound(Arrays.asList(this, taintLevel));
     }
 }
