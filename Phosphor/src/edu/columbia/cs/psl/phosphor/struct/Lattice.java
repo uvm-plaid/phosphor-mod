@@ -30,14 +30,14 @@ public class Lattice<Element> {
         }
     }
 
-    public void addElement(Element element) {
+    public synchronized void addElement(Element element) {
         latticeGraph.addNode(latticeGraph.new Node(element));
         reverseLatticeGraph.addNode(reverseLatticeGraph.new Node(element));
 
         size += 1;
     }
 
-    public void addOrdering(Element lessThan, Element greaterThan) {
+    public synchronized void addOrdering(Element lessThan, Element greaterThan) {
         latticeGraph.addEdge(latticeGraph.new Edge(lessThan, greaterThan));
         reverseLatticeGraph.addEdge(reverseLatticeGraph.new Edge(greaterThan, lessThan));
 
@@ -50,14 +50,15 @@ public class Lattice<Element> {
         }
     }
 
-    public Element leastUpperBound(Collection<Element> elements) {
+    public synchronized Element leastUpperBound(Collection<Element> elements) {
         if (elements.size() == 0) {
             return null;
         }
 
         ArrayList<HashSet<Element>> elementUpperBounds = new ArrayList<>();
         for (Element lubElement : elements) {
-            elementUpperBounds.add(new HashSet<>(latticeGraph.breadthFirstTraversal(lubElement)));
+            ArrayList<Element> traversed = latticeGraph.breadthFirstTraversal(lubElement);
+            elementUpperBounds.add(new HashSet<>(traversed));
         }
 
         HashSet<Element> sharedUpperBounds = elementUpperBounds.get(0);
@@ -83,14 +84,14 @@ public class Lattice<Element> {
                 leastUpperBound = element;
             } else {
                 if (compareElements(leastUpperBound, minimal) > 0) {
-                    minimal = element;
+                    leastUpperBound = element;
                 }
             }
         }
         return leastUpperBound;
     }
 
-    public Element greatestLowerBound(Collection<Element> elements) {
+    public synchronized Element greatestLowerBound(Collection<Element> elements) {
         if (elements.size() == 0) {
             return null;
         }
@@ -123,14 +124,14 @@ public class Lattice<Element> {
                 greatestUpperBound = element;
             } else {
                 if (compareElements(greatestUpperBound, minimal) < 0) {
-                    minimal = element;
+                    greatestUpperBound = element;
                 }
             }
         }
         return greatestUpperBound;
     }
 
-    public int compareElements(Element first, Element second) {
+    public synchronized int compareElements(Element first, Element second) {
         // starting from the first element, if the second element is discovered then it is greater than the first
         for (Element bfsElement : latticeGraph.breadthFirstTraversal(first)) {
             if (bfsElement.equals(second)) {
