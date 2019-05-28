@@ -57,6 +57,8 @@ public class Configuration {
 	public static String STRING_SET_TAG_TAINT_CLASS = "edu/columbia/cs/psl/phosphor/runtime/TaintChecker";
 	public static boolean ALWAYS_CHECK_FOR_FRAMES = false;
 
+	public static boolean CHECK_OBJECT_FIELDS = true;
+
 	public static class Method {
 		final String name;
 		final String owner;

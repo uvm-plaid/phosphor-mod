@@ -1,10 +1,15 @@
 package edu.columbia.cs.psl.phosphor.runtime;
 
 import com.sun.org.apache.xpath.internal.operations.Mult;
+import edu.columbia.cs.psl.phosphor.Configuration;
 import edu.columbia.cs.psl.phosphor.Logger;
 import edu.columbia.cs.psl.phosphor.struct.*;
+import java.lang.reflect.Field;
 
 import java.lang.reflect.Array;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * This class handles dynamically doing source-based tainting.
@@ -26,6 +31,15 @@ import java.lang.reflect.Array;
  *
  */
 public class TaintSourceWrapper<T extends AutoTaintLabel> {
+
+	// https://stackoverflow.com/questions/1042798/retrieving-the-inherited-attribute-names-values-using-java-reflection
+	private static List<Field> getFields(List<Field> fields, Class<?> type) {
+		fields.addAll(Arrays.asList(type.getDeclaredFields()));
+		if (type.getSuperclass() != null) {
+			getFields(fields, type.getSuperclass());
+		}
+		return fields;
+	}
 
 	public void combineTaintsOnArray(Object inputArray, Taint<T> tag){
 		if(tag == null) {
@@ -64,7 +78,10 @@ public class TaintSourceWrapper<T extends AutoTaintLabel> {
 
 	private static void sanitizeTaint(Taint taint) {
 		if (taint != null) {
+			Logger.debug("was: " + taint.getTaintLevel());
 			taint.setTaintLevel(taint.getTaintLevel().greatestLowerBound(TaintLevel.MAYBE_TAINTED));
+		} else {
+			Logger.debug("taint == null");
 		}
 	}
 
@@ -79,8 +96,18 @@ public class TaintSourceWrapper<T extends AutoTaintLabel> {
 				}
 			}
 		} else if(obj instanceof TaintedWithObjTag) {
-			if (((TaintedWithObjTag) obj).getPHOSPHOR_TAG() != null) {
-				sanitizeTaint((Taint) ((TaintedWithObjTag) obj).getPHOSPHOR_TAG());
+			sanitizeTaint((Taint) ((TaintedWithObjTag) obj).getPHOSPHOR_TAG());
+			if (Configuration.CHECK_OBJECT_FIELDS) {
+				for (Field field : getFields(new ArrayList<Field>(), obj.getClass())) {
+					try {
+						field.setAccessible(true);
+						if (field.get(obj) instanceof String) {
+							sanitize(field.get(obj));
+						}
+					} catch (IllegalAccessException e) {
+						e.printStackTrace();
+					}
+				}
 			}
 		}else if(obj instanceof LazyArrayObjTags) {
 			LazyArrayObjTags tags = ((LazyArrayObjTags) obj);
@@ -99,9 +126,9 @@ public class TaintSourceWrapper<T extends AutoTaintLabel> {
 				sanitize(ctrl.taint);
 			}
 		} else if(obj instanceof TaintedPrimitiveWithObjTag) {
-			if(((TaintedPrimitiveWithObjTag)obj).taint != null) {
-				sanitizeTaint(((TaintedPrimitiveWithObjTag) obj).taint);
-			}
+			sanitizeTaint(((TaintedPrimitiveWithObjTag) obj).taint);
+		} else {
+			Logger.debug("tainted obj is something else");
 		}
 	}
 
@@ -121,6 +148,7 @@ public class TaintSourceWrapper<T extends AutoTaintLabel> {
 	/* Adds the specified tag to the specified object. */
 	public Object autoTaint(Object obj, Taint<? extends AutoTaintLabel> tag) {
 		tag.setTaintLevel(TaintLevel.TAINTED);
+		Logger.debug("auto tainted: " + obj);
 	    if(obj == null) {
 	        return null;
         } else if(obj instanceof LazyArrayObjTags) {
@@ -228,6 +256,18 @@ public class TaintSourceWrapper<T extends AutoTaintLabel> {
 			if(((TaintedWithObjTag) obj).getPHOSPHOR_TAG() != null) {
 				taintViolation((Taint<T>) ((TaintedWithObjTag) obj).getPHOSPHOR_TAG(), obj, baseSink, actualSink);
 			}
+			if (Configuration.CHECK_OBJECT_FIELDS) {
+				for (Field field : getFields(new ArrayList<Field>(), obj.getClass())) {
+					try {
+						field.setAccessible(true);
+						if (field.get(obj) instanceof String) {
+							checkTaint(field.get(obj), baseSink, actualSink);
+						}
+					} catch (IllegalAccessException e) {
+						e.printStackTrace();
+					}
+				}
+			}
 		} else if(obj instanceof LazyArrayIntTags) {
 			checkTaints(((LazyArrayIntTags) obj).taints, actualSink);
 		} else if(obj instanceof LazyArrayObjTags) {
@@ -258,6 +298,7 @@ public class TaintSourceWrapper<T extends AutoTaintLabel> {
 
     public void taintViolation(Taint<T> tag, Object obj, String baseSink, String actualSink) {
 		TaintLevel taintLevel = TaintLevel.fromTaint(tag);
+		Logger.debug(actualSink + ", sinking: " + obj + ": " + taintLevel);
 		if (taintLevel == TaintLevel.MAYBE_TAINTED) {
 			Logger.warning("maybe tainted value sunk!\n" + tag + "\n" + obj);
 		} else if (taintLevel == TaintLevel.TAINTED) {

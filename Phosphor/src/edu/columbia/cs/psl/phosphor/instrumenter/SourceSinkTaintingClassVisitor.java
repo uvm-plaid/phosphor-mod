@@ -36,6 +36,7 @@ public class SourceSinkTaintingClassVisitor extends ClassVisitor {
             // Method is not a native method and it is not a method for which $$PHOSPHORTAGGED or TaintSentinel containing version should have been created.
             if(BasicSourceSinkManager.getInstance().isSink(className, name, desc)) {
                 // Method is a sink
+                Logger.info("found sink: " + className + " " + name + " " + desc);
                 final SinkTaintingMV sinkMV = new SinkTaintingMV(mv, access, className, name, desc);
                 mv = new MethodNode(Configuration.ASM_VERSION, access, name, desc, signature, exceptions) {
                     @Override
