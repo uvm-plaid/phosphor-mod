@@ -83,7 +83,7 @@ public class Lattice<Element> {
             if (leastUpperBound == null) {
                 leastUpperBound = element;
             } else {
-                if (compareElements(leastUpperBound, minimal) > 0) {
+                if (compareElements(leastUpperBound, element) < 0) {
                     leastUpperBound = element;
                 }
             }
@@ -123,7 +123,7 @@ public class Lattice<Element> {
             if (greatestUpperBound == null) {
                 greatestUpperBound = element;
             } else {
-                if (compareElements(greatestUpperBound, minimal) < 0) {
+                if (compareElements(greatestUpperBound, element) > 0) {
                     greatestUpperBound = element;
                 }
             }
