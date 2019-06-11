@@ -4,11 +4,14 @@ import com.sun.org.apache.xpath.internal.operations.Mult;
 import edu.columbia.cs.psl.phosphor.Configuration;
 import edu.columbia.cs.psl.phosphor.Logger;
 import edu.columbia.cs.psl.phosphor.struct.*;
+import sun.text.resources.CollationData;
+
 import java.lang.reflect.Field;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -249,6 +252,10 @@ public class TaintSourceWrapper<T extends AutoTaintLabel> {
 							taintViolation(t, obj, baseSink, actualSink);
 					}
 				}
+			}
+		} else if(obj instanceof Collection) {
+			for(Object o : ((Collection) obj)) {
+				checkTaint(o, baseSink, actualSink);
 			}
 		} else if(obj instanceof TaintedWithIntTag) {
 			checkTaint(((TaintedWithIntTag)obj).getPHOSPHOR_TAG(), actualSink);
