@@ -151,7 +151,7 @@ public class TaintSourceWrapper<T extends AutoTaintLabel> {
 	/* Adds the specified tag to the specified object. */
 	public Object autoTaint(Object obj, Taint<? extends AutoTaintLabel> tag) {
 		tag.setTaintLevel(TaintLevel.TAINTED);
-		Logger.debug("auto tainted: " + obj);
+		//Logger.debug("auto tainted: " + obj);
 	    if(obj == null) {
 	        return null;
         } else if(obj instanceof LazyArrayObjTags) {
@@ -235,11 +235,16 @@ public class TaintSourceWrapper<T extends AutoTaintLabel> {
 			for(Object argument : arguments) {
 				checkTaint(argument, baseSink, actualSink);
 			}
+
+			if (self != null && arguments.length == 0) {
+				checkTaint(self, baseSink, actualSink);
+			}
 		}
 	}
 
 	@SuppressWarnings("unchecked")
 	public void checkTaint(Object obj, String baseSink, String actualSink) {
+		//Logger.debug("checking: " + obj);
 		if(obj instanceof String) {
 			Taint[] taints = getStringValueTaints((String) obj);
 			if (taints != null) {
@@ -267,7 +272,8 @@ public class TaintSourceWrapper<T extends AutoTaintLabel> {
 				for (Field field : getFields(new ArrayList<Field>(), obj.getClass())) {
 					try {
 						field.setAccessible(true);
-						if (field.get(obj) instanceof String) {
+						if (field.get(obj) instanceof String ||
+							field.get(obj) instanceof List) {
 							checkTaint(field.get(obj), baseSink, actualSink);
 						}
 					} catch (IllegalAccessException e) {
