@@ -42,6 +42,10 @@ public class AutoTaintLabel implements Serializable {
 
 	@Override
 	public String toString() {
-		return "AutoTaintLabel [source=" + source + ", trace=" + Arrays.toString(trace) + "]";
+		String traceStr = "\n";
+		for (StackTraceElement element : trace) {
+			traceStr += "\t" + element + "\n";
+		}
+		return "AutoTaintLabel [source=" + source + ", trace=" + traceStr + "]";
 	}
 }
