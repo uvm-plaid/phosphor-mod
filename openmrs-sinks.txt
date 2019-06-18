@@ -34,18 +34,18 @@ org/hibernate/engine/spi/SessionImplementor.scroll(Lorg/hibernate/engine/query/s
 org/hibernate/engine/spi/SessionImplementor.executeUpdate(Ljava/lang/String;Lorg/hibernate/engine/spi/QueryParameters;)I
 org/hibernate/engine/spi/SessionImplementor.executeNativeUpdate(Lorg/hibernate/engine/query/spi/sql/NativeSQLQuerySpecification;Lorg/hibernate/engine/spi/QueryParameters;)I
 
-org/hibernate/Session.delete(Ljava/lang/Object;)V
-org/hibernate/Session.delete(Ljava/lang/String;Ljava/lang/Object;)V
-org/hibernate/Session.save(Ljava/lang/Object;)Ljava/io/Serializable;
-org/hibernate/Session.save(Ljava/lang/String;Ljava/lang/Object;)Ljava/io/Serializable;
-org/hibernate/Session.saveOrUpdate(Ljava/lang/Object;)V
-org/hibernate/Session.saveOrUpdate(Ljava/lang/String;Ljava/lang/Object;)V
-org/hibernate/Session.update(Ljava/lang/Object;)V
-org/hibernate/Session.update(Ljava/lang/String;Ljava/lang/Object;)V
-org/hibernate/Session.load(Ljava/lang/String;Ljava/io/Serializable;Lorg/hibernate/LockMode;)Ljava/lang/Object;
-org/hibernate/Session.load(Ljava/lang/String;Ljava/io/Serializable;Lorg/hibernate/LockOptions;)Ljava/lang/Object;
-org/hibernate/Session.load(Ljava/lang/String;Ljava/io/Serializable;)Ljava/lang/Object;
-org/hibernate/Session.load(Ljava/lang/Object;Ljava/io/Serializable;)V
+#org/hibernate/Session.delete(Ljava/lang/Object;)V
+#org/hibernate/Session.delete(Ljava/lang/String;Ljava/lang/Object;)V
+#org/hibernate/Session.save(Ljava/lang/Object;)Ljava/io/Serializable;
+#org/hibernate/Session.save(Ljava/lang/String;Ljava/lang/Object;)Ljava/io/Serializable;
+#org/hibernate/Session.saveOrUpdate(Ljava/lang/Object;)V
+#org/hibernate/Session.saveOrUpdate(Ljava/lang/String;Ljava/lang/Object;)V
+#org/hibernate/Session.update(Ljava/lang/Object;)V
+#org/hibernate/Session.update(Ljava/lang/String;Ljava/lang/Object;)V
+#org/hibernate/Session.load(Ljava/lang/String;Ljava/io/Serializable;Lorg/hibernate/LockMode;)Ljava/lang/Object;
+#org/hibernate/Session.load(Ljava/lang/String;Ljava/io/Serializable;Lorg/hibernate/LockOptions;)Ljava/lang/Object;
+#org/hibernate/Session.load(Ljava/lang/String;Ljava/io/Serializable;)Ljava/lang/Object;
+#org/hibernate/Session.load(Ljava/lang/Object;Ljava/io/Serializable;)V
 
 #org.hibernate.Criteria
 #org/hibernate/Criteria.list()Ljava/util/List;
