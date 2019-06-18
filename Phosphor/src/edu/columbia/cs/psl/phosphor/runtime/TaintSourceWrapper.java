@@ -9,10 +9,8 @@ import sun.text.resources.CollationData;
 import java.lang.reflect.Field;
 
 import java.lang.reflect.Array;
+import java.util.*;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
 
 /**
  * This class handles dynamically doing source-based tainting.
@@ -81,16 +79,16 @@ public class TaintSourceWrapper<T extends AutoTaintLabel> {
 
 	private static void sanitizeTaint(Taint taint) {
 		if (taint != null) {
-			Logger.debug("was: " + taint.getTaintLevel());
+			//Logger.debug("was: " + taint.getTaintLevel());
 			taint.setTaintLevel(taint.getTaintLevel().greatestLowerBound(TaintLevel.MAYBE_TAINTED));
 		} else {
-			Logger.debug("taint == null");
+			//Logger.debug("taint == null");
 		}
 	}
 
 	/* called by sanitizers */
 	public static void sanitize(Object obj) {
-		Logger.info("sanitized: " + obj);
+		//Logger.info("sanitized: " + obj);
 		if(obj instanceof String) {
 			Taint[] taints = getStringValueTaints((String) obj);
 			if (taints != null) {
@@ -136,9 +134,15 @@ public class TaintSourceWrapper<T extends AutoTaintLabel> {
 	}
 
 	public Taint<AutoTaintLabel> generateTaint(String source) {
-		StackTraceElement[] st = Thread.currentThread().getStackTrace();
-		StackTraceElement[] s = new StackTraceElement[st.length - 3];
-		System.arraycopy(st, 3, s, 0, s.length);
+		Map<Thread, StackTraceElement[]> stackTraces = Thread.getAllStackTraces();
+		ArrayList<StackTraceElement> st = new ArrayList<>();
+		for (StackTraceElement[] elements : stackTraces.values()) {
+			st.addAll(Arrays.asList(elements));
+		}
+
+		//StackTraceElement[] st = Thread.currentThread().getStackTrace();
+		StackTraceElement[] s = new StackTraceElement[st.size() - 3];
+		System.arraycopy(st.toArray(), 3, s, 0, s.length);
 		return new Taint<>(new AutoTaintLabel(source, s));
 	}
 
@@ -244,7 +248,7 @@ public class TaintSourceWrapper<T extends AutoTaintLabel> {
 
 	@SuppressWarnings("unchecked")
 	public void checkTaint(Object obj, String baseSink, String actualSink) {
-		//Logger.debug("checking: " + obj);
+		Logger.debug("checking: " + obj);
 		if(obj instanceof String) {
 			Taint[] taints = getStringValueTaints((String) obj);
 			if (taints != null) {
@@ -259,7 +263,11 @@ public class TaintSourceWrapper<T extends AutoTaintLabel> {
 				}
 			}
 		} else if(obj instanceof Collection) {
-			for(Object o : ((Collection) obj)) {
+			for (Object o : ((Collection) obj)) {
+				checkTaint(o, baseSink, actualSink);
+			}
+		} else if(obj instanceof Map) {
+			for (Object o : (((Map) obj).values())) {
 				checkTaint(o, baseSink, actualSink);
 			}
 		} else if(obj instanceof TaintedWithIntTag) {
@@ -272,8 +280,10 @@ public class TaintSourceWrapper<T extends AutoTaintLabel> {
 				for (Field field : getFields(new ArrayList<Field>(), obj.getClass())) {
 					try {
 						field.setAccessible(true);
+						//Logger.debug("field name: " + field.getName() + " - of type: " + field.getType().toString());
 						if (field.get(obj) instanceof String ||
-							field.get(obj) instanceof List) {
+							field.get(obj) instanceof Map) {
+							Logger.debug("field name: " + field.getName());
 							checkTaint(field.get(obj), baseSink, actualSink);
 						}
 					} catch (IllegalAccessException e) {
