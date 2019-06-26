@@ -248,14 +248,13 @@ public class TaintSourceWrapper<T extends AutoTaintLabel> {
 
 	@SuppressWarnings("unchecked")
 	public void checkTaint(Object obj, String baseSink, String actualSink) {
-		Logger.debug("checking: " + obj);
+		//Logger.debug("checking: " + obj);
 		if(obj instanceof String) {
 			Taint[] taints = getStringValueTaints((String) obj);
 			if (taints != null) {
 				SimpleHashSet<String> reported = new SimpleHashSet<>();
 				for (Taint t : taints) {
 					if (t != null) {
-						//System.out.println(t.getTaintLevel());
 						String _t = new String(t.toString().getBytes());
 						if (reported.add(_t))
 							taintViolation(t, obj, baseSink, actualSink);
@@ -283,7 +282,7 @@ public class TaintSourceWrapper<T extends AutoTaintLabel> {
 						//Logger.debug("field name: " + field.getName() + " - of type: " + field.getType().toString());
 						if (field.get(obj) instanceof String ||
 							field.get(obj) instanceof Map) {
-							Logger.debug("field name: " + field.getName());
+							//Logger.debug("field name: " + field.getName());
 							checkTaint(field.get(obj), baseSink, actualSink);
 						}
 					} catch (IllegalAccessException e) {
