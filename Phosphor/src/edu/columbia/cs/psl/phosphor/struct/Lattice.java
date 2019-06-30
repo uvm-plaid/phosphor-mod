@@ -8,22 +8,14 @@ public class Lattice<Element> {
     private Graph<Element> latticeGraph;
     private Graph<Element> reverseLatticeGraph;
 
-    private Element minimal;
-
-    private Integer size;
-
     public Lattice() {
         latticeGraph = new Graph<>();
         reverseLatticeGraph = new Graph<>();
-        minimal = null;
-        size = 0;
     }
 
     public Lattice(Collection<Element> elements) {
         latticeGraph = new Graph<>();
         reverseLatticeGraph = new Graph<>();
-        minimal = null;
-        size = 0;
 
         for (Element element : elements) {
             addElement(element);
@@ -33,21 +25,11 @@ public class Lattice<Element> {
     public synchronized void addElement(Element element) {
         latticeGraph.addNode(latticeGraph.new Node(element));
         reverseLatticeGraph.addNode(reverseLatticeGraph.new Node(element));
-
-        size += 1;
     }
 
     public synchronized void addOrdering(Element lessThan, Element greaterThan) {
         latticeGraph.addEdge(latticeGraph.new Edge(lessThan, greaterThan));
         reverseLatticeGraph.addEdge(reverseLatticeGraph.new Edge(greaterThan, lessThan));
-
-        if (minimal == null) {
-            minimal = lessThan;
-        } else {
-            if (compareElements(lessThan, minimal) > 0) {
-                minimal = lessThan;
-            }
-        }
     }
 
     public synchronized Element leastUpperBound(Collection<Element> elements) {
