@@ -134,15 +134,17 @@ public class TaintSourceWrapper<T extends AutoTaintLabel> {
 	}
 
 	public Taint<AutoTaintLabel> generateTaint(String source) {
+		/*
 		Map<Thread, StackTraceElement[]> stackTraces = Thread.getAllStackTraces();
 		ArrayList<StackTraceElement> st = new ArrayList<>();
 		for (StackTraceElement[] elements : stackTraces.values()) {
 			st.addAll(Arrays.asList(elements));
 		}
+		*/
 
-		//StackTraceElement[] st = Thread.currentThread().getStackTrace();
-		StackTraceElement[] s = new StackTraceElement[st.size() - 3];
-		System.arraycopy(st.toArray(), 3, s, 0, s.length);
+		StackTraceElement[] st = Thread.currentThread().getStackTrace();
+		StackTraceElement[] s = new StackTraceElement[st.length - 3];
+		System.arraycopy(st, 3, s, 0, s.length);
 		return new Taint<>(new AutoTaintLabel(source, s));
 	}
 
