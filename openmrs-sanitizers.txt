@@ -54,3 +54,17 @@ org/hibernate/Query.setEntity(ILjava/lang/Object;)Lorg/hibernate/Query;
 org/hibernate/Query.setEntity(Ljava/lang/String;Ljava/lang/Object;)Lorg/hibernate/Query;
 org/hibernate/Query.setResultTransformer(Lorg/hibernate/transform/ResultTransformer;)Lorg/hibernate/Query;
 
+#org.hibernate.Criteria
+org/hibernate/Criteria.createAlias(Ljava/lang/String;Ljava/lang/String;)Lorg/hibernate/Criteria;
+org/hibernate/Criteria.createAlias(Ljava/lang/String;Ljava/lang/String;Lorg/hibernate/sql/JoinType;)Lorg/hibernate/Criteria;
+org/hibernate/Criteria.createAlias(Ljava/lang/String;Ljava/lang/String;I)Lorg/hibernate/Criteria;
+org/hibernate/Criteria.createAlias(Ljava/lang/String;Ljava/lang/String;Lorg/hibernate/sql/JoinType;Lorg/hibernate/criterion/Criterion;)Lorg/hibernate/Criteria;
+org/hibernate/Criteria.createAlias(Ljava/lang/String;Ljava/lang/String;ILorg/hibernate/criterion/Criterion;)Lorg/hibernate/Criteria;
+org/hibernate/Criteria.createCriteria(Ljava/lang/String;)Lorg/hibernate/Criteria;
+org/hibernate/Criteria.createCriteria(Ljava/lang/String;Lorg/hibernate/sql/JoinType;)Lorg/hibernate/Criteria;
+org/hibernate/Criteria.createCriteria(Ljava/lang/String;I)Lorg/hibernate/Criteria;
+org/hibernate/Criteria.createCriteria(Ljava/lang/String;Ljava/lang/String;)Lorg/hibernate/Criteria;
+org/hibernate/Criteria.createCriteria(Ljava/lang/String;Ljava/lang/String;Lorg/hibernate/sql/JoinType;)Lorg/hibernate/Criteria;
+org/hibernate/Criteria.createCriteria(Ljava/lang/String;Ljava/lang/String;I)Lorg/hibernate/Criteria;
+org/hibernate/Criteria.createCriteria(Ljava/lang/String;Ljava/lang/String;Lorg/hibernate/sql/JoinType;Lorg/hibernate/criterion/Criterion;)Lorg/hibernate/Criteria;
+org/hibernate/Criteria.createCriteria(Ljava/lang/String;Ljava/lang/String;ILorg/hibernate/criterion/Criterion;)Lorg/hibernate/Criteria;
