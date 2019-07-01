@@ -1,10 +1,3 @@
-#org/openmrs/api/impl/ConceptServiceImpl.sanitizeString(Ljava/lang/String;)Ljava/lang/String;
-#org/openmrs/api/db/hibernate/HibernateConceptDAO.sanitizeGetConcepts(Ljava/lang/String;Ljava/util/List;ZLjava/util/List;Ljava/util/List;Ljava/util/List;Ljava/util/List;Lorg/openmrs/Concept;Ljava/lang/Integer;Ljava/lang/Integer;)V
-
-#org/springframework/validation/Validator.validate(Ljava/lang/Object;Lorg/springframework/validation/Errors;)V
-
-org/hibernate/search/FullTextQuery.setProjection(Ljava/lang/String;[)Lorg/hibernate/search/FullTextQuery;
-
 #org.hibernate.Query
 org/hibernate/Query.setParameter(ILjava/lang/Object;Lorg/hibernate/type/Type;)Lorg/hibernate/Query;
 org/hibernate/Query.setParameter(Ljava/lang/String;Ljava/lang/Object;Lorg/hibernate/type/Type;)Lorg/hibernate/Query;
@@ -60,20 +53,4 @@ org/hibernate/Query.setCalendarDate(Ljava/lang/String;Ljava/util/Calendar;)Lorg/
 org/hibernate/Query.setEntity(ILjava/lang/Object;)Lorg/hibernate/Query;
 org/hibernate/Query.setEntity(Ljava/lang/String;Ljava/lang/Object;)Lorg/hibernate/Query;
 org/hibernate/Query.setResultTransformer(Lorg/hibernate/transform/ResultTransformer;)Lorg/hibernate/Query;
-
-
-#org.hibernate.Criteria
-org/hibernate/Criteria.createAlias(Ljava/lang/String;Ljava/lang/String;)Lorg/hibernate/Criteria;
-org/hibernate/Criteria.createAlias(Ljava/lang/String;Ljava/lang/String;Lorg/hibernate/sql/JoinType;)Lorg/hibernate/Criteria;
-org/hibernate/Criteria.createAlias(Ljava/lang/String;Ljava/lang/String;I)Lorg/hibernate/Criteria;
-org/hibernate/Criteria.createAlias(Ljava/lang/String;Ljava/lang/String;Lorg/hibernate/sql/JoinType;Lorg/hibernate/criterion/Criterion;)Lorg/hibernate/Criteria;
-org/hibernate/Criteria.createAlias(Ljava/lang/String;Ljava/lang/String;ILorg/hibernate/criterion/Criterion;)Lorg/hibernate/Criteria;
-org/hibernate/Criteria.createCriteria(Ljava/lang/String;)Lorg/hibernate/Criteria;
-org/hibernate/Criteria.createCriteria(Ljava/lang/String;Lorg/hibernate/sql/JoinType;)Lorg/hibernate/Criteria;
-org/hibernate/Criteria.createCriteria(Ljava/lang/String;I)Lorg/hibernate/Criteria;
-org/hibernate/Criteria.createCriteria(Ljava/lang/String;Ljava/lang/String;)Lorg/hibernate/Criteria;
-org/hibernate/Criteria.createCriteria(Ljava/lang/String;Ljava/lang/String;Lorg/hibernate/sql/JoinType;)Lorg/hibernate/Criteria;
-org/hibernate/Criteria.createCriteria(Ljava/lang/String;Ljava/lang/String;I)Lorg/hibernate/Criteria;
-org/hibernate/Criteria.createCriteria(Ljava/lang/String;Ljava/lang/String;Lorg/hibernate/sql/JoinType;Lorg/hibernate/criterion/Criterion;)Lorg/hibernate/Criteria;
-org/hibernate/Criteria.createCriteria(Ljava/lang/String;Ljava/lang/String;ILorg/hibernate/criterion/Criterion;)Lorg/hibernate/Criteria;
 
