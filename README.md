@@ -1,88 +1,47 @@
-Phosphor: Dynamic Taint Tracking for the JVM
-========
+# OpenMRS Fuzzer
+
+The OpenMRS Fuzzer is a program that logs into OpenMRS and systematically visits every page it can find, enters all the data in all the places it can, and then submits that data for every submit button discovered.
+
+For information about the Fuzzer and how to use it, continue reading this README. For other information, see the following:
+
+- [Phosphor Modification Documentation](./documentation/Phosphor%20Modification%20Documentation.md)
+- [Fuzzer Results Explanation](./documentation/Fuzzer%20Results%20Explanation.md)
+- [Reproducing Our Results](./documentation/Fuzzer%20Results%20Reproduction%20Instructions.md)
 
 
-Phosphor is a system for performing dynamic taint analysis in the JVM, on commodity JVMs (e.g. Oracle's HotSpot or OpenJDK's IcedTea). This repository contains the source for Phosphor. For more information about how Phosphor works and what it could be useful for, please refer to our [OOPSLA 2014 paper](http://jonbell.net/publications/phosphor), [ISSTA 2015 Tool Demo ](http://mice.cs.columbia.edu/getTechreport.php?techreportID=1601) or email [Jonathan Bell](mailto:jbell@cs.columbia.edu). José Cambronero also maintains a [series of examples on using Phosphor](https://github.com/josepablocam/phosphor-examples/).
+## Overview
 
-Note - for those interested in reproducing our OOPSLA 2014 experiments, please find a [VM Image with all relevant files here](http://academiccommons.columbia.edu/catalog/ac%3A182689), and a [README with instructions for doing so here](https://www.dropbox.com/s/dmebj6k8izams6p/artifact-63-phosphor.pdf?dl=0).
+### Purpose
+
+The purpose of the OpenMRS Fuzzer is twofold. First and foremost, the Fuzzer attempts to submit as much data to the OpenMRS web server as it can in order to demonstrate the implementation of taint-tracking software that enables administrators to mark sources, sanitizers, and sinks that tainted data could pass through. After running the Fuzzer, the data that actually makes it any marked sanitizers and sinks can be observed.
+
+Second, the Fuzzer generates reports regarding the time it takes to complete the actions it takes. This includes both form submit times as well as page loading times when traversing \<a\> tags. These reports are useful to compare the overhead imposed by the taint-tracking software.
+
+Fortuitously, the Fuzzer also works as a nice way of reproducing data obtained in our experiment.
+
+### How it works
+
+The OpenMRS Fuzzer works by using a browser automation package called Selenium. The Fuzzer starts by logging in to OpenMRS. It then looks for and maintains a collection of all the \<a\> tags on the page. The same search is performed on tags that can be altered by the user, such as input tags and checkboxes. This is done so that the Fuzzer can enter arbitrary data to the page everywhere it can. 
+
+The important data fields are likely that of text boxes, since very strict validation can be performed on other inputs such as checkboxes and radio buttons. However, the Fuzzer will interact with fields other than text boxes since this is often necessary in order for validation to pass on the submitted form (and thus have the data be sent to any potential database query). 
+
+There are some cases where the form does not pass validation, despite the Fuzzer entering data and interacting with all of the form's elements. In this case, the Fuzzer prompts the user to change what's necessary on the form in order for it to be submitted. This is due to validation checks such as proper date formatting or requiring the name of a previously created person. The user can then tell the Fuzzer to repeat the form submission with the data entered, or skip the form submission if even the user is unable to pass validation (which could happen, for example, if the form expects some data that needs to be entered on another form that has not been visited yet).
+
+After a page is checked for \<a\> tags, populated with arbitrary data, and all the forms have been submitted, these same steps are taken recursively on one of the linked pages that has not yet been visited. This continues until all the page's links have been exhausted. 
+
+### Relation to OpenMRS
+
+There are several instances where this Fuzzer relies on the fuzzed page to be OpenMRS specifically. For example, when determining if a form has passed validation the HTML is searched for specific class names. These class names would not be used in other web apps, and therefore, for reasons such as this one, this Fuzzer is meant only to fuzz OpenMRS.
 
 
-Running
--------
-Phosphor works by modifying your application's bytecode to perform data flow tracking. To be complete, Phosphor also modifies the bytecode of JRE-provided classes, too. The first step to using Phosphor is generating an instrumented version of your runtime environment. We have tested Phosphor with versions 7 and 8 of both Oracle's HotSpot JVM and OpenJDK's IcedTea JVM.
+## Usage
 
-The instrumenter takes two primary arguments: first a path containing the classes to instrument, and then a destination for the instrumented classes. You can also specify to track taint tags through control flow, to use objects as tags (instead of integers), or to automatically perform taint marking in particular methods using the various options as shown by invoking Phosphor with the "-help" option.
+The Fuzzer is used in the following manner.
 
+First, ensure Python is installed. The Fuzzer was written for and tested in Python 3. Also, install Selenium via `pip3 install selenium`.
 
-```
-usage: java -jar phosphor.jar [OPTIONS] [input] [output]
- -controlTrack                  Enable taint tracking through control flow
- -help                          print this message
- -multiTaint                    Support for 2^32 tags instead of just 32
- -withoutDataTrack              Disable taint tracking through data flow
-                                (on by default)
-```
-Phosphor now should be configured to correctly run JUnit tests (with taint tracking) in most environments (Mac + Linux... sorry Windows!). Running `mvn verify` should cause Phosphor to generate several different instrumented JRE's (for multitaint use, int-tag taint use, and control track use) into the project's `target` directory, then run unit tests in that JRE that are automatically tracked. You take a look at the test cases to see some example usage. Test cases that end in `IntTagITCase` are executed with Phosphor configured for integer tags, tests that end in `ObjTagITCase` are executed with Phosphor configured for object tags (multi tainting), and `ImplicitITCase` tests run in the control tracking mode.
- 
-We'll assume that in all of the code examples below, we're in the same directory (which has a copy of Phosphor-0.0.4-SNAPSHOT.jar, which you generated by downloading Phosphor, and running `mvn package`), and that the JRE is located here: `/Library/Java/JavaVirtualMachines/jdk1.7.0_45.jdk/Contents/Home/jre` (modify this path in the commands below to match your environment).
+Then, clone or download the source code from this repository. Import the Fuzzer class from Fuzzer, and create a new Fuzzer class. The first argument is the output spreadsheet of timing data for the form submits and the second argument is the output spreadsheet of timing data for the page loads. Next, call `fuzz()` on the Fuzzer object and pass it the root URL of OpenMRS. This will likely be: `http://localhost:8080/openmrs/`.
 
-Then, to instrument the JRE we'll run:
-`java -jar Phosphor-0.0.4-SNAPSHOT.jar /Library/Java/JavaVirtualMachines/jdk1.7.0_45.jdk/Contents/Home/jre jre-inst`
+Then, for the most part, the Fuzzer will run on its own, traversing pages and submitting data. When the Fuzzer submits a form that does not pass validation, it will stop activity and prompt you to submit the form again, or continue to the next form. If you wish to resubmit the form, fill out the form so that it will pass validation and then enter `s` into the Fuzzer. If you wish to skip, enter `c` into the Fuzzer. You may attempt to pass validation on the same form as many times as you want.
 
-After you do this, make sure to chmod +x the binaries in the new folder, e.g. `chmod +x jre-inst/bin/*`
-
-The next step is to instrument the code which you would like to track. This time when you run the instrumenter, pass your entire (compiled) code base to Phosphor for instrumentation, and specify an output folder for that.
-
-We can now run the instrumented code using our instrumented JRE, as such:
-`JAVA_HOME=jre-inst/ $JAVA_HOME/bin/java  -Xbootclasspath/a:Phosphor-0.0.4-SNAPSHOT.jar -javaagent:Phosphor-0.0.4-SNAPSHOT.jar -cp path-to-instrumented-code your.main.class`
-
-Note: It is not 100% necessary to instrument your application/library code in advance - the javaagent will detect any uninstrumented class files as they are being loaded into the JVM and instrument them as necessary. If you want to do this, then you may want to add the flag `-javaagent:Phosphor-0.0.4-SNAPSHOT.jar=cacheDir=someCacheFolder` and Phosphor will cache the generated files in `someCacheFolder` so they aren't regenerated every run. If you take a look at the execution of Phosphor's JUnit tests, you'll notice that this is how they are instrumented. It's always necessary to instrument the JRE in advance though for bootstrapping.
-
-New 2/27/19: You can no longer specify auto taint methods (what were sources/sinks/taint through methods) for the static instrumenter. Instead, ALL autotaint instrumentation happens via the java agent (this makes it possible to detect child-classes of auto taint classes). You can specify the files to the java agent using the syntax `-javaagent:Phosphor-0.0.4-SNAPSHOT.jar=taintSources={taintSourceFile},taintSinks={taintSinksFile},taintThrough={taintThroughFile}`
-
-Interacting with Phosphor
------
-Phosphor exposes a simple API to allow to marking data with tags, and to retrieve those tags. Key functionality is implemented in two different classes, one for interacting with integer taint tags (``edu.columbia.cs.psl.phosphor.runtime.Tainter``), and one for interacting with object tags (used for the multi-taint mode: (``edu.columbia.cs.psl.phosphor.runtime.MultiTainter``)). To get or set the taint tag of a primitive type, developers call the taintedX or getTaint(X) method (replacing X with each of the primitive types, e.g. taintedByte, etc.).
-Ignore the methods ending with the suffix $$PHOSPHOR, they are used internally.
-To get or set the taint tag of an object, developers first cast that object to the interface TaintedWithIntTag or TaintedWithObjTag (Phosphor changes all classes to implement this interface), and use the get and set methods.
-
-In the case of integer tags, developers can determine if a variable is derived from a particular tainted source by checking the bit mask of that variable's tag (since tags are combined by bitwise OR'ing them).
-In the case of multi-tainting, developers can determine if a variable is derived from a particular tainted source by examining the dependencies of that variable's tag.
-
-You *can* detaint variables with Phosphor - to do so, simply use the `Tainter` or `MultiTainter` interface (as appropriate) to set the taint on a value to `0` (or `null`).
-
-Building
-------
-Phosphor is a maven project. You can generate the jar with a simple `mvn package`. You can run the tests with `mvn verify` (which also generates the jar). Phosphor requires Java >= 8 to build and run its tests - but can still be used with Java 7 (there are now tests included for Phosphor's functionality with lambdas). If you are making changes to Phosphor and running the tests, you will want to make sure that Phosphor regenerates the instrumented JRE between test runs (because you are changing the instrumentation process). To do so, simply do `mvn clean verify` instead. If you would like to develop Phosphor in eclipse, use `mvn eclipse:eclipse` to generate eclipse project files, then import the project into Eclipse.
-
-Notes on control tracking
------
-Please note that the control tracking functionality can impose SIGNIFICANT overhead (we've observed > 10x slowdown) depending on the structure of the code you are instrumenting and the amount of tainted data flowing around. This is incredibly un-optimized at this point. This also can make it difficult to apply Phosphor with control tracking to very large methods (since it causes them to grow beyond the maximum size permitted). Nonetheless, we have had great success applying it in various projects --- it works fine on the JDK (perhaps a few internal classes will be too large, but they were not needed in our workloads) and on projects like Tomcat. There are quite a few paths to improving this functionality. If you are interested in helping, please contact us.
-
-Questions, concerns, comments
-----
-Please email [Jonathan Bell](mailto:bellj@gmu.edu) with any feedback. This project is still under heavy development, and we are working on many extensions, and would very much welcome any feedback.
-
-License
--------
-This software is released under the MIT license.
-
-Copyright (c) 2013, by The Trustees of Columbia University in the City of New York.
-
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-Acknowledgements
---------
-This project makes use of the following libraries:
-* [ASM](http://asm.ow2.org/license.html), (c) 2000-2011 INRIA, France Telecom, [license](http://asm.ow2.org/license.html)
-* [Apache Harmony](https://harmony.apache.org), (c) The Apache Software Foundation, [license](http://www.apache.org/licenses/LICENSE-2.0)
-
-Phosphor's performance tuning is made possible by [JProfiler, the java profiler](https://www.ej-technologies.com/products/jprofiler/overview.html).
-
-The authors of this software are [Jonathan Bell](http://jonbell.net) and [Gail Kaiser](http://www.cs.columbia.edu/~kaiser/). Jonathan Bell is funded in part by NSF CCF-1763822 and CCF-1844880. Gail Kaiser directs the [Programming Systems Laboratory](http://www.psl.cs.columbia.edu/), funded in part by NSF CCF-1161079, NSF CNS-0905246, and NIH U54 CA121852.
-
-[![githalytics.com alpha](https://cruel-carlota.pagodabox.com/ae2f03ebde27be607b8ffe5a9911293d "githalytics.com")](http://githalytics.com/Programming-Systems-Lab/phosphor)
+When the Fuzzer has exhausted all of the links it has seen from all of the pages, it will end.
