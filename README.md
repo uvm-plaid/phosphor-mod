@@ -6,7 +6,7 @@ The following is a description of all the modifications made to Phosphor in orde
 - Introduction of 'maybe tainted' data (rather than simply 'tainted' data) that is partially trusted due to its passing through of a marked sanitizer function.
 - Ability to write tainted and maybe tainted data that reaches a marked sink to a log file.
 
-The modified fork of Phosphor can be found on [this Github.](https://github.com/uvm-plaid/phosphor-mod) The entire list of source code changes can be found [here.](https://github.com/uvm-plaid/phosphor-mod/compare/80b78c848aa5220db1e121f4d15ac3884064c4e3..master)
+The the original Phosphor can be found on [this Github.](https://github.com/gmu-swe/phosphor) The entire list of source code changes can be found [here.](https://github.com/uvm-plaid/phosphor-mod/compare/80b78c848aa5220db1e121f4d15ac3884064c4e3..master)
 
 
 ## Introduction of Taint Level
